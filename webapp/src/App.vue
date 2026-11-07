@@ -151,6 +151,15 @@ function onDropCard(i) {
   dragOver.value = ''
 }
 
+function onSlotDragStart(e, i) {
+  dragQueueFrom.value = i
+  dragSkill.value = null
+  try {
+    e.dataTransfer.setData('text/plain', 'slot-' + i)
+    e.dataTransfer.effectAllowed = 'move'
+  } catch (err) { /* ignore */ }
+}
+
 function onDropQueue(i) {
   if (!dragSkill.value) return
   queue.value[i] = dragSkill.value
@@ -404,10 +413,10 @@ onBeforeUnmount(() => {
                   <button v-for="n in 9" :key="n" @click="queueActiveEvent(n - 1)"
                           @dragover.prevent="dragOver = 'queue-' + (n - 1)" @dragleave="dragOver = ''" @drop.prevent="onDropQueue(n - 1)"
                           @contextmenu.prevent="clearQueueSlot(n - 1)"
-                          draggable="true" @dragstart.stop="dragQueueFrom = n - 1" @dragend="dragQueueFrom = -1"
-                          class="slot" :class="{ on: queueEdit === n - 1, over: dragOver === 'queue-' + (n - 1), done: n - 1 < qIndex }"
+                          draggable="true" @dragstart.stop="onSlotDragStart($event, n - 1)" @dragend="dragQueueFrom = -1"
+                          class="slot" :class="{ on: queueEdit === n - 1, over: dragOver === 'queue-' + (n - 1), done: n - 1 < qIndex, dragging: dragQueueFrom === n - 1 }"
                           :title="queue[n-1] ? queue[n-1].name : '空位 ' + n">
-                    <img v-if="queue[n-1] && queue[n-1].icon" :src="queue[n-1].icon" class="h-full w-full object-cover" alt="" />
+                    <img v-if="queue[n-1] && queue[n-1].icon" :src="queue[n-1].icon" class="pointer-events-none h-full w-full object-cover" alt="" draggable="false" />
                     <span v-else-if="queue[n-1]" class="grid h-full w-full place-items-center text-[15px] font-extrabold text-white [text-shadow:0_1px_2px_rgba(0,0,0,.35)]"
                           :class="catKey(queue[n-1].cat) === 'active' ? 'bg-gradient-to-br from-[#63E0D6] to-[#1F9C92]'
                                   : catKey(queue[n-1].cat) === 'special' ? 'bg-gradient-to-br from-[#C9B0FF] to-[#7B57D8]'
@@ -489,6 +498,7 @@ onBeforeUnmount(() => {
 .slot.on { border-color: #FFC93C; }
 .slot.over { border-color: #FFC93C; box-shadow: 0 0 0 3px rgba(255,201,60,.35); }
 .slot.done { opacity: .42; }
+.slot.dragging { opacity: .45; transform: scale(.94); }
 .btn { height: 34px; padding: 0 14px; border-radius: 10px; border: 1.5px solid rgba(255,255,255,.35); background: rgba(255,255,255,.10); color: #FFF6DC; font-size: 12.5px; font-weight: 700; transition: background .15s, transform .1s; }
 .btn:hover { background: rgba(255,255,255,.18); }
 .btn:active { transform: translateY(1px); }
