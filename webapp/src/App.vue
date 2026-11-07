@@ -151,6 +151,51 @@ function onDropCard(i) {
   dragOver.value = ''
 }
 
+const slotDrag = ref(null)
+let slotPending = null
+
+function onSlotMouseDown(e, i) {
+  if (e.button !== 0) return
+  if (!queue.value[i]) { queueEdit.value = i; return }
+  slotPending = { i, x: e.clientX, y: e.clientY }
+  window.addEventListener('mousemove', onSlotMouseMove)
+  window.addEventListener('mouseup', onSlotMouseUp, { once: true })
+}
+
+function onSlotMouseMove(e) {
+  if (!slotPending) return
+  const dx = e.clientX - slotPending.x
+  const dy = e.clientY - slotPending.y
+  if (!slotDrag.value && Math.hypot(dx, dy) < 4) return
+  const sk = queue.value[slotPending.i]
+  if (!sk) return
+  slotDrag.value = { from: slotPending.i, x: e.clientX, y: e.clientY, skill: sk }
+}
+
+function swapSlots(a, b) {
+  if (a === b) return
+  const t = queue.value[a]
+  queue.value[a] = queue.value[b]
+  queue.value[b] = t
+  showToast(`第 ${a + 1} 位与第 ${b + 1} 位已交换`, 'ok')
+}
+
+function onSlotMouseUp(e) {
+  window.removeEventListener('mousemove', onSlotMouseMove)
+  if (slotDrag.value) {
+    const el = document.elementFromPoint(e.clientX, e.clientY)
+    const node = el && el.closest ? el.closest('[data-slot]') : null
+    if (node) {
+      const to = Number(node.getAttribute('data-slot'))
+      if (!Number.isNaN(to)) swapSlots(slotDrag.value.from, to)
+    }
+    slotDrag.value = null
+  } else if (slotPending) {
+    queueEdit.value = slotPending.i
+  }
+  slotPending = null
+}
+
 function onSlotDragStart(e, i) {
   dragQueueFrom.value = i
   dragSkill.value = null
@@ -410,11 +455,11 @@ onBeforeUnmount(() => {
                   <button class="pbtn ml-auto" @click="clearQueue">清空</button>
                 </div>
                 <div class="mt-2 flex items-center gap-1">
-                  <button v-for="n in 9" :key="n" @click="queueActiveEvent(n - 1)"
+                  <button v-for="n in 9" :key="n" :data-slot="n - 1"
+                          @mousedown.prevent="onSlotMouseDown($event, n - 1)"
                           @dragover.prevent="dragOver = 'queue-' + (n - 1)" @dragleave="dragOver = ''" @drop.prevent="onDropQueue(n - 1)"
                           @contextmenu.prevent="clearQueueSlot(n - 1)"
-                          draggable="true" @dragstart.stop="onSlotDragStart($event, n - 1)" @dragend="dragQueueFrom = -1"
-                          class="slot" :class="{ on: queueEdit === n - 1, over: dragOver === 'queue-' + (n - 1), done: n - 1 < qIndex, dragging: dragQueueFrom === n - 1 }"
+                          class="slot" :class="{ on: queueEdit === n - 1, over: dragOver === 'queue-' + (n - 1), done: n - 1 < qIndex, dragging: slotDrag && slotDrag.from === n - 1 }"
                           :title="queue[n-1] ? queue[n-1].name : '空位 ' + n">
                     <img v-if="queue[n-1] && queue[n-1].icon" :src="queue[n-1].icon" class="pointer-events-none h-full w-full object-cover" alt="" draggable="false" />
                     <span v-else-if="queue[n-1]" class="grid h-full w-full place-items-center text-[15px] font-extrabold text-white [text-shadow:0_1px_2px_rgba(0,0,0,.35)]"
@@ -466,6 +511,16 @@ onBeforeUnmount(() => {
       </main>
     </div>
 
+    <div v-if="slotDrag" class="slot-ghost" :style="{ left: slotDrag.x + 'px', top: slotDrag.y + 'px' }">
+      <img v-if="slotDrag.skill.icon" :src="slotDrag.skill.icon" class="h-full w-full rounded-lg object-cover" alt="" />
+      <span v-else class="grid h-full w-full place-items-center text-[16px] font-extrabold text-white"
+            :class="catKey(slotDrag.skill.cat) === 'active' ? 'bg-gradient-to-br from-[#63E0D6] to-[#1F9C92]'
+                    : catKey(slotDrag.skill.cat) === 'special' ? 'bg-gradient-to-br from-[#C9B0FF] to-[#7B57D8]'
+                    : 'bg-gradient-to-br from-[#FFD66B] to-[#E0951B]'">
+        {{ slotDrag.skill.name.charAt(0) }}
+      </span>
+    </div>
+
     <transition name="toast">
       <div v-if="toast.show" class="toast" :class="toast.kind">{{ toast.msg }}</div>
     </transition>
@@ -499,6 +554,7 @@ onBeforeUnmount(() => {
 .slot.over { border-color: #FFC93C; box-shadow: 0 0 0 3px rgba(255,201,60,.35); }
 .slot.done { opacity: .42; }
 .slot.dragging { opacity: .45; transform: scale(.94); }
+.slot-ghost { position: fixed; z-index: 30; width: 40px; height: 40px; transform: translate(-50%, -50%) scale(1.08); border-radius: 10px; border: 2px solid #FFC93C; overflow: hidden; box-shadow: 0 8px 18px rgba(0,0,0,.4), 0 0 0 4px rgba(255,201,60,.25); pointer-events: none; }
 .btn { height: 34px; padding: 0 14px; border-radius: 10px; border: 1.5px solid rgba(255,255,255,.35); background: rgba(255,255,255,.10); color: #FFF6DC; font-size: 12.5px; font-weight: 700; transition: background .15s, transform .1s; }
 .btn:hover { background: rgba(255,255,255,.18); }
 .btn:active { transform: translateY(1px); }
