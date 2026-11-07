@@ -1,3 +1,13 @@
 @echo off
-cd /d "%~dp0.."
-"C:\Windows\Microsoft.NET\Framework4.0.30319\csc.exe" /nologo /target:winexe /out:dist\BuffTool.exe /r:System.Windows.Forms.dll /r:System.Drawing.dll tools\BuffTool.cs
+chcp 65001 >nul
+cd /d "%~dp0"
+
+echo [1/2] 构建前端
+pushd webapp
+call npm run build
+popd
+
+echo [2/2] 构建宿主
+dotnet build app\WildsBuff.csproj -c Release --nologo
+
+echo 完成：app\bin\Release\net9.0-windows\WildsBuff.exe
