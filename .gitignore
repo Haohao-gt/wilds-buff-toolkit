@@ -1,0 +1,18 @@
+# 构建产物
+dist/
+web/
+webapp/node_modules/
+app/bin/
+app/obj/
+
+# 运行期 / 临时文件
+work/
+__pycache__/
+*.pyc
+*.log
+*.etl
+*.pcap
+
+# 游戏素材（不随仓库分发）
+icons/
+work/tables/

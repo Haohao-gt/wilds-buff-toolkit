@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #app { height: 100%; }
+body {
+  margin: 0;
+  overflow: hidden;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+  background:
+    radial-gradient(120% 60% at 50% 0%, rgba(255,255,255,.35), transparent 60%),
+    radial-gradient(90% 50% at 15% 100%, rgba(70,214,206,.18), transparent 60%),
+    linear-gradient(180deg, #74CBF4 0%, #3E9BE2 45%, #2A78C8 100%);
+}
+body::before{
+  content:"";
+  position:fixed; inset:0; pointer-events:none;
+  background-image:
+    radial-gradient(closest-side, rgba(255,255,255,.35), transparent) ,
+    radial-gradient(closest-side, rgba(255,255,255,.22), transparent);
+  background-size: 420px 220px, 320px 180px;
+  background-position: 12% 18%, 82% 30%;
+  background-repeat: no-repeat;
+  opacity:.55;
+}
+
+::-webkit-scrollbar { width: 7px; height: 7px; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,.35); border-radius: 7px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+@keyframes stamp {
+  0% { transform: scale(.97); }
+  55% { transform: scale(1.015); }
+  100% { transform: scale(1); }
+}
+.stamp { animation: stamp .22s ease; }
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translate(-50%, 8px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}

@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net9.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <AssemblyName>WildsBuff</AssemblyName>
+    <RootNamespace>WildsBuff</RootNamespace>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>../assets/app.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Web.WebView2.Core">
+      <HintPath>../dist/wv2/Microsoft.Web.WebView2.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Web.WebView2.WinForms">
+      <HintPath>../dist/wv2/Microsoft.Web.WebView2.WinForms.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="../dist/wv2/WebView2Loader.dll" CopyToOutputDirectory="PreserveNewest" Link="WebView2Loader.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="../assets/app.ico" CopyToOutputDirectory="PreserveNewest" Link="app.ico" />
+    <None Include="../assets/logo.png" CopyToOutputDirectory="PreserveNewest" Link="logo.png" />
+  </ItemGroup>
+</Project>
