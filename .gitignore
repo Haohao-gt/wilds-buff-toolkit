@@ -16,3 +16,4 @@ __pycache__/
 # 游戏素材（不随仓库分发）
 icons/
 work/tables/
+release/
